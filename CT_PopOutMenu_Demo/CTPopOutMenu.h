@@ -18,8 +18,8 @@ typedef enum : NSUInteger {
 
 @property (nonatomic,readonly) NSString * title;
 @property (nonatomic,readonly) UIImage * image;
-@property (nonatomic,copy) dispatch_block_t action;
 @property (nonatomic) UIColor * tintColor;
+//default color is white
 
 -(instancetype)initWithTitle:(NSString*)title image:(UIImage*)image;
 
@@ -46,7 +46,7 @@ typedef enum : NSUInteger {
 //highlightColor of items, the default color is white with alpha 0.5
 @property (nonatomic) CGColorRef borderColor;
 //borderColor of menuView, default color is white
-@property (nonatomic) CGFloat blurRadius, borderRadius;
+@property (nonatomic) CGFloat blurLevel, borderRadius;
 //blurRadius of backgroundView, default value is 3.5(0~10)
 //borderRadius of menuView, default is 5
 @property (nonatomic) PopoutMenuStyle menuStyle;
