@@ -9,7 +9,7 @@
 #import "ViewController.h"
 #import "CTPopOutMenu.h"
 
-@interface ViewController ()
+@interface ViewController ()<CTPopoutMenuDelegate>
 @property (nonatomic) CTPopoutMenu * popMenu;
 @end
 
@@ -24,7 +24,15 @@
         [items addObject:item];
     }
     self.popMenu = [[CTPopoutMenu alloc]initWithTitle:@"Test Title I want to test the auto break title" message:@"test message: this is a test message for the popout menu test test test..." items:items];
-    
+    self.popMenu.delegate = self;
+}
+
+-(void)menu:(CTPopoutMenu *)menu willDismissWithSelectedItemAtIndex:(NSUInteger)index{
+    NSLog(@"menu dismiss with index %ld",index);
+}
+
+-(void)menuwillDismiss:(CTPopoutMenu *)menu{
+    NSLog(@"menu dismiss");
 }
 
 - (IBAction)showList:(id)sender {
@@ -34,18 +42,20 @@
 - (IBAction)showDefault:(id)sender {
     self.popMenu.menuStyle = MenuStyleDefault;
     [self.popMenu showMenuInParentViewController:self withCenter:self.view.center];
+    [self.popMenu.activityIndicator startAnimating];
 }
 - (IBAction)showOval:(id)sender {
     self.popMenu.menuStyle = MenuStyleOval;
     [self.popMenu showMenuInParentViewController:self withCenter:self.view.center];
+    [self.popMenu.activityIndicator startAnimating];
+}
+- (IBAction)showGrid:(id)sender {
+    self.popMenu.menuStyle = MenuStyleGrid;
+    [self.popMenu showMenuInParentViewController:self withCenter:self.view.center];
+    
 }
 
--(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
-    for (UITouch*touch in touches) {
-        CGPoint loc = [touch locationInView:self.view];
-        [self.popMenu showMenuInParentViewController:self withCenter:loc];
-    }
-}
+
 
 
 @end

@@ -11,6 +11,7 @@ typedef enum : NSUInteger {
     MenuStyleDefault,
     MenuStyleList,
     MenuStyleOval,
+    MenuStyleGrid,
 } PopoutMenuStyle;
 
 
@@ -22,7 +23,9 @@ typedef enum : NSUInteger {
 //default tintColor is whiteColor
 //default backgroundColor is clearColor
 @property (nonatomic) NSTextAlignment textAligment;
+//default textAligment is NSTextAligmentCenter
 @property (nonatomic) UIFont * font;
+//defaut font is system font with size 14
 
 -(instancetype)initWithTitle:(NSString*)title image:(UIImage*)image;
 
@@ -64,7 +67,9 @@ typedef enum : NSUInteger {
 -(instancetype)initWithTitle:(NSString *)title message:(NSString *)message items:(NSArray *)items;
 -(instancetype)initWithTitle:(NSString *)title message:(NSString *)message images:(NSArray *)images;
 -(instancetype)initWithTitle:(NSString *)title message:(NSString *)message itemTitles:(NSArray *)itemTitles;
+
 -(void)showMenuInParentViewController:(UIViewController*)parentVC withCenter:(CGPoint)center;
+-(void)dismissMenu;
 
 @end
 

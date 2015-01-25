@@ -141,6 +141,9 @@
         case MenuStyleOval:
             [self layoutMenuItemViewasOval];
             break;
+        case MenuStyleGrid:
+            [self layoutMenuItemViewasGrid];
+            break;
     }
 }
 
@@ -178,12 +181,16 @@
     CGSize imageSize;
     if (self.image!=nil) {
         imageSize = CGSizeMake(self.bounds.size.width*0.7, self.bounds.size.height-labelSize.height-5);
-        self.iconIamageView.frame = CGRectMake(self.bounds.size.width*0.1, self.bounds.size.height*0.05, imageSize.width, imageSize.height);
+        self.iconIamageView.frame = CGRectMake(self.bounds.size.width*0.15, self.bounds.size.height*0.05, imageSize.width, imageSize.height);
         [self.iconIamageView setContentMode:UIViewContentModeScaleAspectFit];
     }else{
         self.iconIamageView = nil;
     }
     self.titleLabel.frame = CGRectMake(self.bounds.size.width*0.05, CGRectGetMaxY(self.iconIamageView.frame), labelSize.width, labelSize.height);
+}
+
+-(void)layoutMenuItemViewasGrid{
+    [self layoutMenuItemViewasOval];
 }
 
 -(void)dealloc{
@@ -196,6 +203,7 @@
 
 @interface CTPopoutMenu ()
 @property (nonatomic)UIImageView * blurView;
+@property (nonatomic)CGPoint menuCenter;
 @property (nonatomic)NSMutableArray * itemViews;
 @property (nonatomic)UITextView * messageView, * titleView;
 @property (nonatomic)CTPopoutMenuItemView * selectedItemView;
@@ -301,7 +309,7 @@
 
 -(void)showMenuInParentViewController:(UIViewController *)parentVC withCenter:(CGPoint)center{
     [self ct_addToParentVC:parentVC withAnimation:YES];
-    self.menuView.center = center;
+    self.menuCenter = center;
     self.view.frame = parentVC.view.bounds;
     self.blurView = [[UIImageView alloc]init];
     [self.view addSubview:self.blurView];
@@ -311,9 +319,9 @@
 }
 
 -(void)dismissMenu{
-    [UIView animateWithDuration:0.5 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.75 options:0 animations:^{
+    [UIView animateWithDuration:0.2 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.75 options:0 animations:^{
         if (self.menuView.superview!=nil) {
-            self.menuView.transform = CGAffineTransformMakeScale(0.01, 0.01);
+            self.menuView.transform = CGAffineTransformMakeScale(0.1, 0.1);
         }
     } completion:^(BOOL finished) {
         [self ct_removeFromParentVCwithAnimation:YES];
@@ -397,6 +405,9 @@
         case MenuStyleOval:
             [self layoutasOval];
             break;
+        case MenuStyleGrid:
+            [self layoutasGrid];
+            break;
         default:
             [self layoutasDefault];
             break;
@@ -404,7 +415,7 @@
 
     [self.view addSubview:self.menuView];
     self.menuView.transform = CGAffineTransformMakeScale(0.1, 0.1);
-    [UIView animateWithDuration:0.5 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.75 options:0 animations:^{
+    [UIView animateWithDuration:0.2 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.75 options:0 animations:^{
         self.menuView.transform = CGAffineTransformMakeScale(1, 1);
     } completion:^(BOOL finished) {
         self.menuView.transform = CGAffineTransformMakeScale(1, 1);
@@ -414,7 +425,7 @@
 }
 
 -(void)layoutasDefault{
-    CGFloat menuWidth = self.view.bounds.size.width*0.8;
+    CGFloat menuWidth = (self.view.bounds.size.width<self.view.bounds.size.height)?self.view.bounds.size.width*0.8:self.view.bounds.size.height*0.8;
     [self layoutTitleandMessagewithMenuWidth:menuWidth];
    
     CGFloat offSetY = CGRectGetMaxY(self.messageView.frame)+FRAME_OFFSET;
@@ -448,14 +459,14 @@
     
     self.menuView.frame = [self menuFramewithWidth:menuWidth
                                 Height:offSetY + rowCount*itemSize.height+FRAME_OFFSET
-                                Center:self.menuView.center];
+                                Center:self.menuCenter];
     [self.menuView addSubview:self.titleView];
     [self.menuView addSubview:self.messageView];
     
 }
 
 -(void)layoutasList{
-    CGFloat menuWidth = self.view.bounds.size.width*0.75;
+    CGFloat menuWidth = (self.view.bounds.size.width<self.view.bounds.size.height)?self.view.bounds.size.width*0.75:self.view.bounds.size.height*0.75;
     [self layoutTitleandMessagewithMenuWidth:menuWidth];
     
     CGSize itemSize = CGSizeMake(menuWidth*0.8, 45);
@@ -468,7 +479,7 @@
         [self.itemViews addObject:itemView];
     }];
     self.menuView.frame = [self menuFramewithWidth:menuWidth
-                                Height:offSetY+self.items.count*itemSize.height Center:self.menuView.center];
+                                Height:offSetY+self.items.count*itemSize.height Center:self.menuCenter];
     [self.menuView addSubview:self.titleView];
     [self.menuView addSubview:self.messageView];
     
@@ -482,7 +493,7 @@
     CGSize itemSize = CGSizeMake(menuWidth*0.2, menuWidth*0.2);
     CGFloat identicalAngle = 2*M_PI / [self.items count];
     
-    self.menuView.frame = [self menuFramewithWidth:menuWidth Height:menuWidth Center:self.menuView.center];
+    self.menuView.frame = [self menuFramewithWidth:menuWidth Height:menuWidth Center:self.menuCenter];
     CGPoint center = CGPointMake(self.menuView.bounds.size.width/2, self.menuView.bounds.size.height/2);
     
     self.menuView.layer.borderWidth = 0;
@@ -511,6 +522,47 @@
     [self.menuView addSubview:self.titleView];
     [self.menuView addSubview:self.messageView];
     
+}
+
+-(void)layoutasGrid{
+    CGFloat menuWidth = (self.view.bounds.size.width<self.view.bounds.size.height)?self.view.bounds.size.width*0.75:self.view.bounds.size.height*0.75;
+    [self layoutTitleandMessagewithMenuWidth:menuWidth];
+    
+    CGFloat offSetY = CGRectGetMaxY(self.messageView.frame)+FRAME_OFFSET;
+    NSInteger colCount = ceilf(sqrtf([self.items count]));
+    NSInteger rowCount = ceilf([self.items count]/(CGFloat)colCount);
+    CGFloat itemWidth = menuWidth/colCount;
+    CGSize itemSize = CGSizeMake(itemWidth, itemWidth);
+    [self.items enumerateObjectsUsingBlock:^(CTPopoutMenuItem * obj, NSUInteger idx, BOOL *stop) {
+        NSUInteger index = idx;
+        while (index >= colCount) {
+            index -= colCount;
+        }
+        NSUInteger rowIndex = floorf((CGFloat)idx/colCount);
+        CTPopoutMenuItemView * itemView = nil;
+        if (idx >= [self.items count]-([self.items count]%colCount)) {
+            CGFloat rowLength = [self.items count]%colCount*itemSize.width;
+            CGFloat offSetX = (menuWidth - rowLength)/2;
+            itemView = [[CTPopoutMenuItemView alloc]initWithMenuItem:obj
+                                                               frame:CGRectMake(offSetX+index*itemSize.width, offSetY+rowIndex*itemSize.height,
+                                                                                itemSize.width, itemSize.height)
+                                                           menuStyle:self.menuStyle];
+        }else{
+            itemView = [[CTPopoutMenuItemView alloc]initWithMenuItem:obj
+                                                               frame:CGRectMake(index*itemSize.width, offSetY+rowIndex*itemSize.height,
+                                                                                itemSize.width, itemSize.height)
+                                                           menuStyle:self.menuStyle];
+        }
+        [self.menuView addSubview:itemView];
+        [self.itemViews addObject:itemView];
+    }];
+    
+    self.menuView.frame = [self menuFramewithWidth:menuWidth
+                                            Height:offSetY + rowCount*itemSize.height+FRAME_OFFSET
+                                            Center:self.menuCenter];
+    [self.menuView addSubview:self.titleView];
+    [self.menuView addSubview:self.messageView];
+
 }
 
 -(void)layoutTitleandMessagewithMenuWidth:(CGFloat)menuWidth{
@@ -578,6 +630,7 @@
 
 -(void)viewDidDisappear:(BOOL)animated{
     [super viewDidDisappear:animated];
+    [self.activityIndicator stopAnimating];
     [self.menuView.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         [obj removeFromSuperview];
     }];
@@ -595,6 +648,8 @@
 
 }
 
+#pragma mark -Rotation
+
 - (NSUInteger)supportedInterfaceOrientations {
     return UIInterfaceOrientationMaskAll;
 }
@@ -604,21 +659,22 @@
 }
 
 -(void)OrientationDidChange:(NSNotification*)notification{
-    CGFloat newCenterX = self.menuView.center.y;
-    CGFloat newCenterY = self.menuView.center.x;
-    self.menuView.center = CGPointMake(newCenterX, newCenterY);
+    CGFloat newCenterX = self.menuCenter.y;
+    CGFloat newCenterY = self.menuCenter.x;
+    self.menuCenter = CGPointMake(newCenterX, newCenterY);
 }
 
 -(void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration{
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
-    [self.menuView.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        [obj removeFromSuperview];
-    }];
-    if ([self isViewLoaded] && self.view.window != nil) {
-        [self createScreenshotwithComleteAction:^{
-            [self layoutMenuView];
-        }];
-    }    
+    if (toInterfaceOrientation!= UIDeviceOrientationPortraitUpsideDown) {
+        if ([self isViewLoaded] && self.view.window != nil) {
+            [self createScreenshotwithComleteAction:^{
+                self.menuView.frame = [self menuFramewithWidth:self.menuView.bounds.size.width
+                                                        Height:self.menuView.bounds.size.height
+                                                        Center:self.menuCenter];
+            }];
+        }        
+    }
 }
 
 #pragma mark -Touch
