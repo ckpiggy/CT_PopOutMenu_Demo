@@ -18,16 +18,34 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg_pattern"]];
-    self.popMenu = [[CTPopoutMenu alloc]initWithTitle:nil message:nil images:nil];
+    NSMutableArray * items = [NSMutableArray new];
+    for (int i =0; i<6; i++) {
+        CTPopoutMenuItem * item = [[CTPopoutMenuItem alloc]initWithTitle:[NSString stringWithFormat:@"item%d",i] image:[UIImage imageNamed:[NSString stringWithFormat:@"pic%d",i]]];
+        [items addObject:item];
+    }
+    self.popMenu = [[CTPopoutMenu alloc]initWithTitle:@"Test Title I want to test the auto break title" message:@"test message: this is a test message for the popout menu test test test..." items:items];
+    
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
--(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
+- (IBAction)showList:(id)sender {
+    self.popMenu.menuStyle = MenuStyleList;
     [self.popMenu showMenuInParentViewController:self withCenter:self.view.center];
 }
+- (IBAction)showDefault:(id)sender {
+    self.popMenu.menuStyle = MenuStyleDefault;
+    [self.popMenu showMenuInParentViewController:self withCenter:self.view.center];
+}
+- (IBAction)showOval:(id)sender {
+    self.popMenu.menuStyle = MenuStyleOval;
+    [self.popMenu showMenuInParentViewController:self withCenter:self.view.center];
+}
+
+-(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
+    for (UITouch*touch in touches) {
+        CGPoint loc = [touch locationInView:self.view];
+        [self.popMenu showMenuInParentViewController:self withCenter:loc];
+    }
+}
+
 
 @end

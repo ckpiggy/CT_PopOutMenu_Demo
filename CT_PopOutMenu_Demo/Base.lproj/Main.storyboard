@@ -2,6 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6254" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
@@ -16,26 +17,75 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lWa-Z5-jw7">
-                                <rect key="frame" x="200" y="200" width="200" height="200"/>
+                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lWa-Z5-jw7">
+                                <rect key="frame" x="200" y="192" width="200" height="200"/>
                                 <color key="backgroundColor" red="0.4766018326" green="1" blue="0.27435389360000001" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="200" id="U2t-vy-qGd"/>
                                     <constraint firstAttribute="width" constant="200" id="b0t-QR-P4J"/>
                                 </constraints>
                             </view>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="emU-7D-y0h">
-                                <rect key="frame" x="180" y="408" width="240" height="178"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="emU-7D-y0h">
+                                <rect key="frame" x="16" y="422" width="568" height="178"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AhD-19-i7P">
+                                <rect key="frame" x="66" y="60" width="50" height="30"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="50" id="QIq-Dp-dtx"/>
+                                </constraints>
+                                <state key="normal" title="List">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="showList:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qWC-WQ-yn2"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IYg-8b-adt">
+                                <rect key="frame" x="273" y="60" width="55" height="30"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="55" id="7kO-Vh-FZG"/>
+                                </constraints>
+                                <state key="normal" title="Default">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="showDefault:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zG6-vb-4lJ"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zm5-fR-BHL">
+                                <rect key="frame" x="484" y="60" width="50" height="30"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="50" id="ESA-TA-Crc"/>
+                                </constraints>
+                                <state key="normal" title="Oval">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="showOval:" destination="BYZ-38-t0r" eventType="touchUpInside" id="B0P-Ox-Ajg"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="centerX" secondItem="lWa-Z5-jw7" secondAttribute="centerX" id="82M-E9-oC5"/>
+                            <constraint firstAttribute="centerX" secondItem="IYg-8b-adt" secondAttribute="centerX" id="99c-WL-6aI"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="emU-7D-y0h" secondAttribute="trailing" id="Cn7-hS-bzH"/>
+                            <constraint firstItem="zm5-fR-BHL" firstAttribute="centerY" secondItem="IYg-8b-adt" secondAttribute="centerY" id="JMW-MZ-q1r"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="zm5-fR-BHL" secondAttribute="trailing" constant="50" id="KZ2-y8-aWx"/>
                             <constraint firstAttribute="centerY" secondItem="lWa-Z5-jw7" secondAttribute="centerY" id="LWt-iT-uX2"/>
+                            <constraint firstItem="zm5-fR-BHL" firstAttribute="centerY" secondItem="AhD-19-i7P" secondAttribute="centerY" id="OYn-DQ-Je3"/>
+                            <constraint firstItem="AhD-19-i7P" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="50" id="PBO-XR-svZ"/>
+                            <constraint firstItem="IYg-8b-adt" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="40" id="Y6T-Ei-wCU"/>
+                            <constraint firstItem="emU-7D-y0h" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="YdV-hD-YuX"/>
+                            <constraint firstItem="emU-7D-y0h" firstAttribute="top" secondItem="lWa-Z5-jw7" secondAttribute="bottom" constant="30" id="gWR-i4-k3A"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="emU-7D-y0h" secondAttribute="bottom" id="sCq-iS-mtb"/>
                         </constraints>
                     </view>
                 </viewController>

@@ -7,9 +7,11 @@
 //
 
 #define TRANSITION_DURATION  0.3
-#define SCREENSHOT_QUALITY  0.6
+#define SCREENSHOT_QUALITY  0.75
+#define FRAME_OFFSET 10
 
 #import "CTPopOutMenu.h"
+#import <CoreText/CoreText.h>
 
 #pragma mark Category
 
@@ -23,7 +25,6 @@
     UIGraphicsEndImageContext();
     NSData * imageData = UIImageJPEGRepresentation(screenImage, SCREENSHOT_QUALITY);
     screenImage = [UIImage imageWithData:imageData];
-    NSLog(@"%@",NSStringFromCGSize(screenImage.size));
     return screenImage;
 }
 
@@ -39,22 +40,33 @@
     return screenImage;
 }
 
+-(void)addTopBorderwithWidth:(CGFloat)width andColor:(CGColorRef)borderColor{
+    CALayer *upperBorder = [CALayer layer];
+    upperBorder.backgroundColor = borderColor;
+    upperBorder.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), width);
+    [self.layer addSublayer:upperBorder];
+}
+
 @end
 
 @implementation UIImage (Blur_and_Color_Filter)
 
 -(UIImage*)blurWithRadius:(CGFloat)radius{
+    radius =(radius<0)?0:radius;
+    radius =(radius>4)?4:radius;
     CIImage * inputImage = [CIImage imageWithCGImage:self.CGImage];
     CIFilter * blurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
     [blurFilter setValue:inputImage forKey:@"inputImage"];
     [blurFilter setValue:[NSNumber numberWithFloat:radius] forKey:@"inputRadius"];
     CIImage * outputImage = [blurFilter outputImage];
+    outputImage = [outputImage imageByCroppingToRect:[inputImage extent]];
     UIImage * blurImage = [UIImage imageWithCIImage:outputImage];
-    
     return blurImage;
 }
 
 @end
+
+
 
 #pragma mark CTPopoutMenuItem
 
@@ -69,7 +81,10 @@
     if (self = [super init]) {
         _title = title;
         _image = image;
+        self.font = [UIFont systemFontOfSize:14];
+        self.textAligment = NSTextAlignmentCenter;
         self.tintColor = [UIColor whiteColor];
+        self.backgroundColor = [UIColor clearColor];
     }
     return self;
 }
@@ -79,33 +94,100 @@
 #pragma mark CTPopoutMenuItemView
 
 @interface CTPopoutMenuItemView : UIView
-@property (nonatomic)NSString * title;
 @property (nonatomic)UILabel * titleLabel;
 @property (nonatomic)UIImage * image;
 @property (nonatomic)UIImageView * iconIamageView;
+@property (nonatomic)PopoutMenuStyle menuStyle;
+
 @end
 
 @implementation CTPopoutMenuItemView
 
--(instancetype)initWithTitle:(NSString*)title image:(UIImage *)image{
+
+-(instancetype)initWithMenuItem:(CTPopoutMenuItem*)item frame:(CGRect)frame menuStyle:(PopoutMenuStyle)menuStyle{
     if (self = [super init]) {
-        self.backgroundColor = [UIColor clearColor];
+        self.menuStyle = menuStyle;
+        self.backgroundColor = item.backgroundColor;
+        self.image = [item.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         
-        self.iconIamageView = [[UIImageView alloc]init];
+        self.titleLabel = [UILabel new];
+        [self.titleLabel setTextColor:item.tintColor];
+        [self.titleLabel setTextAlignment:item.textAligment];
+        self.titleLabel.backgroundColor = [UIColor clearColor];
+        [self.titleLabel setText:item.title];
+        [self.titleLabel setFont:item.font];
+        [self addSubview:self.titleLabel];
+        
+        self.iconIamageView = [UIImageView new];
+        self.iconIamageView.image = self.image;
+        [self.iconIamageView setTintColor:item.tintColor];
         self.iconIamageView.backgroundColor = [UIColor clearColor];
         [self addSubview:self.iconIamageView];
         
-        self.titleLabel = [[UILabel alloc]init];
-        self.titleLabel.backgroundColor = [UIColor clearColor];
-        [self addSubview:self.titleLabel];
-        
-        self.image = image;
+        self.frame = frame;
     }
     return self;
 }
 
+
 -(void)layoutSubviews{
+    switch (self.menuStyle) {
+        case MenuStyleDefault:
+            [self layoutMenuItemViewasDefault];
+            break;
+        case MenuStyleList:
+            [self layoutMenuItemViewasList];
+            break;
+        case MenuStyleOval:
+            [self layoutMenuItemViewasOval];
+            break;
+    }
+}
+
+-(void)layoutMenuItemViewasDefault{
+    CGSize imageSize;
+    if (self.image!= nil) {
+        imageSize = CGSizeMake(self.bounds.size.height*0.9, self.bounds.size.height*0.9);
+        self.iconIamageView.frame = CGRectMake(self.bounds.size.width*0.05, self.bounds.size.height*0.05, imageSize.width, imageSize.height);
+    }else{
+        self.iconIamageView = nil;
+        imageSize = CGSizeMake(0, 0);
+    }
     
+    CGSize labelSize;
+    if (self.titleLabel.text!=nil) {
+        labelSize = CGSizeMake((self.bounds.size.width*0.9 - imageSize.width), self.bounds.size.height*0.9);
+    }else{
+        labelSize = CGSizeMake(0, 0);
+    }
+    self.titleLabel.frame = CGRectMake(CGRectGetMaxX(self.iconIamageView.frame), self.bounds.size.height*0.05, labelSize.width, labelSize.height);
+}
+
+-(void)layoutMenuItemViewasList{
+    [self layoutMenuItemViewasDefault];
+}
+
+-(void)layoutMenuItemViewasOval{
+    CGSize labelSize;
+    if (self.titleLabel.text!= nil) {
+        labelSize = [self.titleLabel sizeThatFits:(CGSize){self.bounds.size.width*0.9,CGFLOAT_MAX}];
+    }else{
+        labelSize = CGSizeMake(0, 0);
+    }
+    labelSize.width = self.bounds.size.width*0.9;
+    CGSize imageSize;
+    if (self.image!=nil) {
+        imageSize = CGSizeMake(self.bounds.size.width*0.7, self.bounds.size.height-labelSize.height-5);
+        self.iconIamageView.frame = CGRectMake(self.bounds.size.width*0.1, self.bounds.size.height*0.05, imageSize.width, imageSize.height);
+        [self.iconIamageView setContentMode:UIViewContentModeScaleAspectFit];
+    }else{
+        self.iconIamageView = nil;
+    }
+    self.titleLabel.frame = CGRectMake(self.bounds.size.width*0.05, CGRectGetMaxY(self.iconIamageView.frame), labelSize.width, labelSize.height);
+}
+
+-(void)dealloc{
+//    NSLog(@"%@ has been dealloc",self.titleLabel.text);
 }
 
 @end
@@ -115,6 +197,8 @@
 @interface CTPopoutMenu ()
 @property (nonatomic)UIImageView * blurView;
 @property (nonatomic)NSMutableArray * itemViews;
+@property (nonatomic)UITextView * messageView, * titleView;
+@property (nonatomic)CTPopoutMenuItemView * selectedItemView;
 
 @end
 
@@ -133,11 +217,17 @@
         _titleText = title;
         _messageText = message;
         _menuView = [UIView new];
-        self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.75];
+        self.textAligment = NSTextAlignmentCenter;
+        self.activityIndicator = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+        self.titleFont = [UIFont systemFontOfSize:[UIFont systemFontSize]+3];
+        self.messageFont = [UIFont systemFontOfSize:[UIFont systemFontSize]];
+        self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.85];
+        self.tintColor = [UIColor whiteColor];
         self.highlightColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:0.5];
         self.borderColor = [UIColor whiteColor].CGColor;
+        self.borderWidth = 2;
         self.borderRadius = 5;
-        self.blurLevel = 3;
+        self.blurLevel = 3.5;
         self.menuStyle = MenuStyleDefault;
         
     }
@@ -167,13 +257,44 @@
 -(void)ct_addToParentVC:(UIViewController*)parentVC withAnimation:(BOOL)animate{
     [parentVC addChildViewController:self];
     [parentVC.view addSubview:self.view];
-    [self createScreenshotwithComleteAction:nil];
 }
 
 -(void)ct_removeFromParentVCwithAnimation:(BOOL)animate{
+    self.menuView.transform = CGAffineTransformIdentity;
     [self removeFromParentViewController];
     [self.view removeFromSuperview];
     [self.blurView removeFromSuperview];
+    self.blurView = nil;
+}
+
+-(CGPoint)ct_centroidOfTouches:(NSSet*)touches inVeiw:(UIView*)view{
+    CGFloat sumX;
+    CGFloat sumY;
+    for (UITouch * touch in touches) {
+        CGPoint loc = [touch locationInView:view];
+        sumX += loc.x;
+        sumY += loc.y;
+    }
+    return CGPointMake(sumX/[touches count], sumY/[touches count]);
+}
+
+-(CTPopoutMenuItemView*)itemViewatPoint:(CGPoint)point{
+    CTPopoutMenuItemView * selectedItemView = nil;
+    if (CGRectContainsPoint(self.menuView.frame, point)) {
+        point = [self.view convertPoint:point toView:self.menuView];
+        selectedItemView = [self.itemViews filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(CTPopoutMenuItemView * itemView, NSDictionary *bindings) {
+            return CGRectContainsPoint(itemView.frame, point);
+        }]].lastObject;
+    }
+    if (selectedItemView!=nil) {
+        selectedItemView.backgroundColor = self.highlightColor;
+        if (self.selectedItemView != selectedItemView) {
+            self.selectedItemView.backgroundColor = [UIColor clearColor];
+            self.selectedItemView = selectedItemView;
+        }
+    }
+    
+    return selectedItemView;
 }
 
 #pragma mark -Animation
@@ -182,48 +303,271 @@
     [self ct_addToParentVC:parentVC withAnimation:YES];
     self.menuView.center = center;
     self.view.frame = parentVC.view.bounds;
-    self.blurView = [[UIImageView alloc]initWithFrame:self.view.bounds];
+    self.blurView = [[UIImageView alloc]init];
     [self.view addSubview:self.blurView];
+    [self createScreenshotwithComleteAction:^{
+        [self layoutMenuView];
+    }];
+}
+
+-(void)dismissMenu{
+    [UIView animateWithDuration:0.5 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.75 options:0 animations:^{
+        if (self.menuView.superview!=nil) {
+            self.menuView.transform = CGAffineTransformMakeScale(0.01, 0.01);
+        }
+    } completion:^(BOOL finished) {
+        [self ct_removeFromParentVCwithAnimation:YES];
+    }];
 }
 
 -(void)createScreenshotwithComleteAction:(dispatch_block_t)completeAction{
+    self.blurView.frame = self.view.bounds;
+    self.blurView.alpha = 0.0;
+    self.menuView.alpha = 0.0;
+    UIImage * screenshot = nil;
+    if ([self.parentViewController.view isKindOfClass:[UIScrollView class]]) {
+        screenshot = [self.parentViewController.view screenShotOnScrolViewWithContentOffset:[(UIScrollView*)self.parentViewController.view contentOffset]];
+    }else{
+        screenshot = [self.parentViewController.view screenShot];
+    }
+    self.blurView.alpha = 1.0;
+    self.menuView.alpha = 1.0;
     if (self.blurLevel >0.0) {
-        UIImage * screenshot = nil;
-        if ([self.parentViewController.view isKindOfClass:[UIScrollView class]]) {
-            screenshot = [self.parentViewController.view screenShotOnScrolViewWithContentOffset:[(UIScrollView*)self.parentViewController.view contentOffset]];
-        }else{
-            screenshot = [self.parentViewController.view screenShot];
-        }
-        if (completeAction != nil) {
-            completeAction();
-        }
+        
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             UIImage * blurImage = [screenshot blurWithRadius:self.blurLevel];
             dispatch_async(dispatch_get_main_queue(), ^{
                 CATransition * transition = [CATransition animation];
                 transition.duration = TRANSITION_DURATION;
+                transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
                 transition.type = kCATransitionFade;
+                
                 self.blurView.image = blurImage;
-                [self.blurView.layer addAnimation:transition forKey:nil];
+                [self.blurView.layer addAnimation:transition forKey:@"showBlurView"];
                 [self.view setNeedsLayout];
+                if (completeAction != nil) {
+                    completeAction();
+                }
+                
+                [self.view setNeedsLayout];
+                [self.view layoutIfNeeded];
             });
         });
+    }else{
+        self.blurView.image = screenshot;
+        if (completeAction != nil) {
+            completeAction();
+        }
     }
-    
 }
+
 
 #pragma mark -Layout
 
+    
 -(void)layoutMenuView{
+    self.itemViews = [NSMutableArray new];
+    
     self.menuView.backgroundColor = _backgroundColor;
+    self.menuView.layer.borderWidth = self.borderWidth;
+    self.menuView.layer.borderColor = self.borderColor;
+    self.menuView.layer.cornerRadius = self.borderRadius;
+    self.menuView.layer.masksToBounds = YES;
+    
+    self.titleView = [UITextView new];
+    self.titleView.userInteractionEnabled = NO;
+    self.titleView.backgroundColor = [UIColor clearColor];
+    [self.titleView setTextAlignment:self.textAligment];
+    [self.titleView setTextColor:self.tintColor];
+    [self.titleView setText:self.titleText];
+    [self.titleView setFont:self.titleFont];
+    
+    self.messageView = [UITextView new];
+    self.messageView.userInteractionEnabled = NO;
+    self.messageView.backgroundColor = [UIColor clearColor];
+    [self.messageView setTextAlignment:self.textAligment];
+    [self.messageView setTextColor:self.tintColor];
+    [self.messageView setText:self.messageText];
+    [self.messageView setFont:self.messageFont];
+    
+    switch (self.menuStyle) {
+        case MenuStyleList:
+            [self layoutasList];
+            break;
+        case MenuStyleOval:
+            [self layoutasOval];
+            break;
+        default:
+            [self layoutasDefault];
+            break;
+    }
+
+    [self.view addSubview:self.menuView];
+    self.menuView.transform = CGAffineTransformMakeScale(0.1, 0.1);
+    [UIView animateWithDuration:0.5 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.75 options:0 animations:^{
+        self.menuView.transform = CGAffineTransformMakeScale(1, 1);
+    } completion:^(BOOL finished) {
+        self.menuView.transform = CGAffineTransformMakeScale(1, 1);
+        self.activityIndicator.center = CGPointMake(self.menuView.bounds.size.width/2, self.menuView.bounds.size.height/2);
+        [self.menuView addSubview:self.activityIndicator];
+    }];
+}
+
+-(void)layoutasDefault{
+    CGFloat menuWidth = self.view.bounds.size.width*0.8;
+    [self layoutTitleandMessagewithMenuWidth:menuWidth];
+   
+    CGFloat offSetY = CGRectGetMaxY(self.messageView.frame)+FRAME_OFFSET;
+    NSInteger colCount = ceilf(sqrtf([self.items count]));
+    NSInteger rowCount = ceilf([self.items count]/(CGFloat)colCount);
+    CGFloat itemWidth = menuWidth/colCount;
+    CGSize itemSize = CGSizeMake(itemWidth, 40);
+    [self.items enumerateObjectsUsingBlock:^(CTPopoutMenuItem * obj, NSUInteger idx, BOOL *stop) {
+        NSUInteger index = idx;
+        while (index >= colCount) {
+            index -= colCount;
+        }
+        NSUInteger rowIndex = floorf((CGFloat)idx/colCount);
+        CTPopoutMenuItemView * itemView = nil;
+        if (idx >= [self.items count]-([self.items count]%colCount)) {
+            CGFloat rowLength = [self.items count]%colCount*itemSize.width;
+            CGFloat offSetX = (menuWidth - rowLength)/2;
+            itemView = [[CTPopoutMenuItemView alloc]initWithMenuItem:obj
+                        frame:CGRectMake(offSetX+index*itemSize.width, offSetY+rowIndex*itemSize.height,
+                                         itemSize.width, itemSize.height)
+                        menuStyle:self.menuStyle];
+        }else{
+            itemView = [[CTPopoutMenuItemView alloc]initWithMenuItem:obj
+                        frame:CGRectMake(index*itemSize.width, offSetY+rowIndex*itemSize.height,
+                                         itemSize.width, itemSize.height)
+                        menuStyle:self.menuStyle];
+        }
+        [self.menuView addSubview:itemView];
+        [self.itemViews addObject:itemView];
+    }];
+    
+    self.menuView.frame = [self menuFramewithWidth:menuWidth
+                                Height:offSetY + rowCount*itemSize.height+FRAME_OFFSET
+                                Center:self.menuView.center];
+    [self.menuView addSubview:self.titleView];
+    [self.menuView addSubview:self.messageView];
     
 }
 
+-(void)layoutasList{
+    CGFloat menuWidth = self.view.bounds.size.width*0.75;
+    [self layoutTitleandMessagewithMenuWidth:menuWidth];
+    
+    CGSize itemSize = CGSizeMake(menuWidth*0.8, 45);
+    CGFloat offSetY = CGRectGetMaxY(self.messageView.frame)+FRAME_OFFSET;
+    CGFloat offSetX = menuWidth * 0.1;
+    [self.items enumerateObjectsUsingBlock:^(CTPopoutMenuItem*obj, NSUInteger idx, BOOL *stop) {
+        CTPopoutMenuItemView * itemView = [[CTPopoutMenuItemView alloc]initWithMenuItem:obj frame:CGRectMake(offSetX, offSetY+idx*itemSize.height, itemSize.width, itemSize.height) menuStyle:self.menuStyle];
+        [itemView addTopBorderwithWidth:self.borderWidth/4 andColor:self.borderColor];
+        [self.menuView addSubview:itemView];
+        [self.itemViews addObject:itemView];
+    }];
+    self.menuView.frame = [self menuFramewithWidth:menuWidth
+                                Height:offSetY+self.items.count*itemSize.height Center:self.menuView.center];
+    [self.menuView addSubview:self.titleView];
+    [self.menuView addSubview:self.messageView];
+    
+}
 
+-(void)layoutasOval{
+    CGFloat menuWidth = (self.view.bounds.size.width<self.view.bounds.size.height)?self.view.bounds.size.width*0.9:self.view.bounds.size.height*0.9;
+    CGFloat radius = menuWidth*0.8/2;
+    [self layoutTitleandMessagewithMenuWidth:menuWidth];
+
+    CGSize itemSize = CGSizeMake(menuWidth*0.2, menuWidth*0.2);
+    CGFloat identicalAngle = 2*M_PI / [self.items count];
+    
+    self.menuView.frame = [self menuFramewithWidth:menuWidth Height:menuWidth Center:self.menuView.center];
+    CGPoint center = CGPointMake(self.menuView.bounds.size.width/2, self.menuView.bounds.size.height/2);
+    
+    self.menuView.layer.borderWidth = 0;
+    CAShapeLayer * circleLayer = [CAShapeLayer new];
+    [circleLayer setPosition:center];
+    [circleLayer setBounds:self.menuView.bounds];
+    UIBezierPath * path = [UIBezierPath bezierPathWithOvalInRect:self.menuView.bounds];
+    [circleLayer setPath:path.CGPath];
+    self.menuView.layer.mask = circleLayer;
+    
+  
+    
+    [self.items enumerateObjectsUsingBlock:^(CTPopoutMenuItem * obj, NSUInteger idx, BOOL *stop) {
+        CGFloat angle = idx*identicalAngle;
+        CTPopoutMenuItemView * itemView = [[CTPopoutMenuItemView alloc]initWithMenuItem:obj frame:CGRectMake(0, 0, itemSize.width, itemSize.height) menuStyle:self.menuStyle];
+        itemView.center = CGPointMake(center.x + cosf(angle)*radius, center.y + sinf(angle)*radius);
+        [self.menuView addSubview:itemView];
+        [self.itemViews addObject:itemView];
+    }];
+    
+    
+    self.titleView.center = CGPointMake(self.menuView.bounds.size.width/2,
+                        self.menuView.bounds.size.height/2 - (self.titleView.bounds.size.height)/2);
+    self.messageView.center = CGPointMake(self.menuView.bounds.size.width/2,
+                    self.menuView.bounds.size.height/2 + (self.messageView.bounds.size.height)/2);
+    [self.menuView addSubview:self.titleView];
+    [self.menuView addSubview:self.messageView];
+    
+}
+
+-(void)layoutTitleandMessagewithMenuWidth:(CGFloat)menuWidth{
+    CGSize titleSize;
+    CGSize messageSize;
+    if (self.menuStyle == MenuStyleOval) {
+        if (self.titleText != nil) {
+            titleSize = [self.titleView sizeThatFits:(CGSize){menuWidth*0.55,CGFLOAT_MAX}];
+            titleSize.width = menuWidth*0.55;
+        }else{
+            titleSize = CGSizeMake(0, 0);
+        }
+        if (self.messageText != nil) {
+            messageSize = [self.messageView sizeThatFits:(CGSize){menuWidth*0.55,CGFLOAT_MAX}];
+            messageSize.width = menuWidth*0.55;
+        }else{
+            messageSize = CGSizeMake(0, 0);
+        }
+        
+    }else{
+        if (self.titleText != nil) {
+            titleSize = [self.titleView sizeThatFits:(CGSize){menuWidth*0.9,CGFLOAT_MAX}];
+            titleSize.width = menuWidth*0.9;
+        }else{
+            titleSize = CGSizeMake(0, 0);
+        }
+        if (self.messageText != nil) {
+            messageSize = [self.messageView sizeThatFits:(CGSize){menuWidth*0.8,CGFLOAT_MAX}];
+            messageSize.width = menuWidth*0.8;
+        }else{
+            messageSize = CGSizeMake(0, 0);
+        }
+    }
+    self.titleView.scrollEnabled = NO;
+    self.titleView.frame = CGRectMake(menuWidth*0.05, FRAME_OFFSET, titleSize.width, titleSize.height);
+    
+    self.messageView.scrollEnabled = NO;
+    self.messageView.frame = CGRectMake(menuWidth*0.1,
+                    CGRectGetMaxY(self.titleView.frame)+FRAME_OFFSET, messageSize.width, messageSize.height);
+}
+
+-(CGRect)menuFramewithWidth:(CGFloat)width Height:(CGFloat)height Center:(CGPoint)center{
+    CGFloat originX = ((center.x-width/2)<0)?0:(center.x-width/2);
+            originX = ((center.x-width/2)>(self.view.bounds.size.width-width))?
+                        (self.view.bounds.size.width-width):(originX);
+    CGFloat originY = ((center.y-height/2)<0)?0:(center.y-height/2);
+            originY = ((center.y-height/2)>(self.view.bounds.size.height-height))?
+                        (self.view.bounds.size.height-height):(originY);
+    CGRect frame = CGRectMake(originX,originY,width,height);
+    return frame;
+}
 
 #pragma mark -ViewController
 - (void)viewDidLoad {
     [super viewDidLoad];
+    NSNotificationCenter * defaultCenter=[NSNotificationCenter defaultCenter];
+    [defaultCenter addObserver:self selector:@selector(OrientationDidChange:) name:UIDeviceOrientationDidChangeNotification object:[UIDevice currentDevice]];
     
 }
 
@@ -232,22 +576,78 @@
     
 }
 
+-(void)viewDidDisappear:(BOOL)animated{
+    [super viewDidDisappear:animated];
+    [self.menuView.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        [obj removeFromSuperview];
+    }];
+    self.menuView.layer.mask = nil;
+    [self.view.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        [obj removeFromSuperview];
+    }];
+    [self.itemViews removeAllObjects];
+    self.itemViews = nil;
+    self.titleView = nil;
+    self.messageView = nil;
+}
+
 -(void)dealloc{
-    
+
+}
+
+- (NSUInteger)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskAll;
+}
+
+-(BOOL)shouldAutorotate{
+    return [self.parentViewController shouldAutorotate];
+}
+
+-(void)OrientationDidChange:(NSNotification*)notification{
+    CGFloat newCenterX = self.menuView.center.y;
+    CGFloat newCenterY = self.menuView.center.x;
+    self.menuView.center = CGPointMake(newCenterX, newCenterY);
+}
+
+-(void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration{
+    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    [self.menuView.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        [obj removeFromSuperview];
+    }];
+    if ([self isViewLoaded] && self.view.window != nil) {
+        [self createScreenshotwithComleteAction:^{
+            [self layoutMenuView];
+        }];
+    }    
 }
 
 #pragma mark -Touch
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
-    [self ct_removeFromParentVCwithAnimation:YES];
+    CGPoint point = [self ct_centroidOfTouches:touches inVeiw:self.view];
+    [self itemViewatPoint:point];
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event{
-    
+    CGPoint point = [self ct_centroidOfTouches:touches inVeiw:self.view];
+    [self itemViewatPoint:point];
 }
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
-    
+    CGPoint point = [self ct_centroidOfTouches:touches inVeiw:self.view];
+    [self itemViewatPoint:point];
+    if (self.selectedItemView != nil) {
+        NSUInteger index = [self.itemViews indexOfObject:self.selectedItemView];
+        if ([self.delegate respondsToSelector:@selector(menu:willDismissWithSelectedItemAtIndex:)]) {
+            [self.delegate menu:self willDismissWithSelectedItemAtIndex:index];
+        }
+        [self dismissMenu];
+    }else{
+        if ([self.delegate respondsToSelector:@selector(menuwillDismiss:)]) {
+            [self.delegate menuwillDismiss:self];
+        }
+        [self dismissMenu];
+    }
 }
 
 

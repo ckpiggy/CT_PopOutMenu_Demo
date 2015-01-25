@@ -18,8 +18,11 @@ typedef enum : NSUInteger {
 
 @property (nonatomic,readonly) NSString * title;
 @property (nonatomic,readonly) UIImage * image;
-@property (nonatomic) UIColor * tintColor;
-//default color is white
+@property (nonatomic) UIColor * tintColor, * backgroundColor;
+//default tintColor is whiteColor
+//default backgroundColor is clearColor
+@property (nonatomic) NSTextAlignment textAligment;
+@property (nonatomic) UIFont * font;
 
 -(instancetype)initWithTitle:(NSString*)title image:(UIImage*)image;
 
@@ -29,7 +32,7 @@ typedef enum : NSUInteger {
 @protocol CTPopoutMenuDelegate <NSObject>
 
 -(void)menu:(CTPopoutMenu*)menu willDismissWithSelectedItemAtIndex:(NSUInteger)index;
-
+-(void)menuwillDismiss:(CTPopoutMenu *)menu ;
 
 @end
 
@@ -37,17 +40,23 @@ typedef enum : NSUInteger {
 
 @property (nonatomic,readonly) NSString * titleText, * messageText;
 //the title and message of the menu
+@property (nonatomic)UIFont * titleFont, * messageFont;
+//the font of title and message
+@property (nonatomic)NSTextAlignment textAligment;
+//default is NSTextAligmentCenter
 @property (nonatomic,readonly) NSArray * items;
 //the buttons of the menu
 @property (nonatomic,readonly) UIView * menuView;
 //the menuView of the PopoutMenu
-@property (nonatomic) UIColor * backgroundColor, * highlightColor;
+@property (nonatomic) UIActivityIndicatorView * activityIndicator;
+//ActivityIndicatorView of menuView default style is UIActivityIndicatorViewStyleWhite
+@property (nonatomic) UIColor * backgroundColor, * highlightColor, *tintColor;
 //backgroundColor of menuView, the default color is black with alpha 0.75
 //highlightColor of items, the default color is white with alpha 0.5
 @property (nonatomic) CGColorRef borderColor;
 //borderColor of menuView, default color is white
-@property (nonatomic) CGFloat blurLevel, borderRadius;
-//blurRadius of backgroundView, default value is 3.5(0~10)
+@property (nonatomic) CGFloat blurLevel, borderRadius, borderWidth;
+//blurRadius of backgroundView, default value is 3.5(0~4)
 //borderRadius of menuView, default is 5
 @property (nonatomic) PopoutMenuStyle menuStyle;
 @property (nonatomic) id<CTPopoutMenuDelegate>delegate;
