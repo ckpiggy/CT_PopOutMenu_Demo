@@ -10,6 +10,7 @@
 #import "CTPopOutMenu.h"
 
 @interface ViewController ()<CTPopoutMenuDelegate>
+@property (strong, nonatomic) IBOutlet UIImageView *imageView;
 @property (nonatomic) CTPopoutMenu * popMenu;
 @end
 
@@ -17,7 +18,12 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg_pattern"]];
+    CAShapeLayer * circleLayer = [CAShapeLayer layer];
+    [circleLayer setPosition:CGPointMake(self.imageView.bounds.size.width/2, self.imageView.bounds.size.height/2)];
+    [circleLayer setBounds:self.imageView.bounds];
+    UIBezierPath * path = [UIBezierPath bezierPathWithOvalInRect:self.imageView.bounds];
+    [circleLayer setPath:path.CGPath];
+    self.imageView.layer.mask = circleLayer;
     NSMutableArray * items = [NSMutableArray new];
     for (int i =0; i<6; i++) {
         CTPopoutMenuItem * item = [[CTPopoutMenuItem alloc]initWithTitle:[NSString stringWithFormat:@"item%d",i] image:[UIImage imageNamed:[NSString stringWithFormat:@"pic%d",i]]];

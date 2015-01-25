@@ -300,6 +300,8 @@
             self.selectedItemView.backgroundColor = [UIColor clearColor];
             self.selectedItemView = selectedItemView;
         }
+    }else{
+        self.selectedItemView = nil;
     }
     
     return selectedItemView;
@@ -699,10 +701,12 @@
         }
         [self dismissMenu];
     }else{
-        if ([self.delegate respondsToSelector:@selector(menuwillDismiss:)]) {
-            [self.delegate menuwillDismiss:self];
+        if (!CGRectContainsPoint(self.menuView.frame, point)) {
+            if ([self.delegate respondsToSelector:@selector(menuwillDismiss:)]) {
+                [self.delegate menuwillDismiss:self];
+            }
+            [self dismissMenu];            
         }
-        [self dismissMenu];
     }
 }
 
