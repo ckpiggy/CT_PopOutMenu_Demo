@@ -705,7 +705,7 @@
             if ([self.delegate respondsToSelector:@selector(menuwillDismiss:)]) {
                 [self.delegate menuwillDismiss:self];
             }
-            [self dismissMenu];            
+            [self dismissMenu];
         }
     }
 }
