@@ -11,7 +11,6 @@
 #define FRAME_OFFSET 10
 
 #import "CTPopOutMenu.h"
-#import <CoreText/CoreText.h>
 
 #pragma mark Category
 
