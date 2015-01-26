@@ -1,6 +1,6 @@
 <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
 # CT_PopOutMenu_Demo
-A pop out menu with bounce animation: inspired by <a href="https://github.com/rnystrom/RNGridMenu">RNGridMenu</a>. This control is like an UIAlertView with button icon and four basic layout. I also added an UIActivityIndicatorView in this control, you can just "startAnimation" to get it work on the pop out menu.
+This control is like an UIAlertView with button icon and four basic layout. I also added an UIActivityIndicatorView in this control, you can just "startAnimation" to get it work on the pop out menu.
 ![alt tag](https://github.com/ckpiggy/CT_PopOutMenu_Demo/blob/master/image/menu_demo.png)
 
 #How to use
@@ -19,6 +19,9 @@ popMenu.delegate = where_you_contol_the_menu;//"self" in most situation
 -(void)menu:(CTPopoutMenu*)menu willDismissWithSelectedItemAtIndex:(NSUInteger)index;
 -(void)menuwillDismiss:(CTPopoutMenu *)menu ;
 </pre>
+
+#Credit
+This control was inspired by <a href="https://github.com/rnystrom/RNGridMenu">RNGridMenu</a>. I learned how to blur background by taking screenshot and blur the image.
 
 #License
 see <a href="https://github.com/ckpiggy/CT_PopOutMenu_Demo/blob/master/LICENSE">LICENSE</a>
