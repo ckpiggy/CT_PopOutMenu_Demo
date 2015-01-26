@@ -10,6 +10,7 @@ To get the menu pop out on the screen, you need three more steps like these code
 <pre>
 NSArray * items = ....
 popMenu = [[CTPopoutMenu alloc]initWithTitle:@"Title" message:@"message" items:items];
+popMenu.menuStyle = MenuStyleDefault , MenuStyleGrid , MenuStyleList or MenuStyleOval;//choose one from these
 [popMenu showMenuInParentViewController:parentVC withCenter:center];
 </pre>
 In the last, you can setup the delegate if you need. It can tell you which item has been selected.
@@ -19,3 +20,9 @@ popMenu.delegate = where_you_contol_the_menu;//"self" in most situation
 -(void)menuwillDismiss:(CTPopoutMenu *)menu ;
 </pre>
 
+#License
+see <a href="https://github.com/ckpiggy/CT_PopOutMenu_Demo/blob/master/LICENSE">LICENSE</a>
+
+#Contact me
+I started to learn obj-C on Sept.2014. If you have any suggestion about improving my coding skill, please contact me. 
+e-mail:mrgmp2004@hotmail.com
