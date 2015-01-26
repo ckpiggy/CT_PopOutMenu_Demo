@@ -1,7 +1,7 @@
 <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
 # CT_PopOutMenu_Demo
 This control is like an UIAlertView with button icon and four basic layout. I also added an UIActivityIndicatorView in this control, you can just "startAnimation" to get it work on the pop out menu.
-![alt tag](https://github.com/ckpiggy/CT_PopOutMenu_Demo/blob/master/image/menu_demo.png)
+![alt tag](https://github.com/ckpiggy/CT_PopOutMenu_Demo/blob/master/images/menu_demo.png)
 
 #How to use
 Drag the CTPopOutMenu.h, CTPopOutMenu.m file into your project and import the .h file.
