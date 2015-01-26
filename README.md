@@ -1,0 +1,21 @@
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+# CT_PopOutMenu_Demo
+A pop out menu with bounce animation: inspired by <a href="https://github.com/rnystrom/RNGridMenu">RNGridMenu</a>. This control is like an UIAlertView with button icon and four basic layout. I also added an UIActivityIndicatorView in this control, you can just "startAnimation" to get it work on the pop out menu.
+![alt tag](https://github.com/ckpiggy/CT_PopOutMenu_Demo/blob/master/image/menu_demo.png)
+
+#How to use
+Drag the CTPopOutMenu.h, CTPopOutMenu.m file into your project and import the .h file.
+Once you drag these file into your project and import .h file you have finished 50% progresses in useing the control.
+To get the menu pop out on the screen, you need three more steps like these code.
+<pre>
+NSArray * items = ....
+popMenu = [[CTPopoutMenu alloc]initWithTitle:@"Title" message:@"message" items:items];
+[popMenu showMenuInParentViewController:parentVC withCenter:center];
+</pre>
+In the last, you can setup the delegate if you need. It can tell you which item has been selected.
+<pre>
+popMenu.delegate = where_you_contol_the_menu;//"self" in most situation 
+-(void)menu:(CTPopoutMenu*)menu willDismissWithSelectedItemAtIndex:(NSUInteger)index;
+-(void)menuwillDismiss:(CTPopoutMenu *)menu ;
+</pre>
+
