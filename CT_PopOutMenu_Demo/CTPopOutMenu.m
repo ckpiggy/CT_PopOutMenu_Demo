@@ -107,21 +107,27 @@
     if (self = [super init]) {
         self.menuStyle = menuStyle;
         self.backgroundColor = item.backgroundColor;
-        self.image = [item.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         
-        self.titleLabel = [UILabel new];
-        [self.titleLabel setTextColor:item.tintColor];
-        [self.titleLabel setTextAlignment:item.textAligment];
-        self.titleLabel.backgroundColor = [UIColor clearColor];
-        [self.titleLabel setText:item.title];
-        [self.titleLabel setFont:item.font];
-        [self addSubview:self.titleLabel];
         
-        self.iconIamageView = [UIImageView new];
-        self.iconIamageView.image = self.image;
-        [self.iconIamageView setTintColor:item.tintColor];
-        self.iconIamageView.backgroundColor = [UIColor clearColor];
-        [self addSubview:self.iconIamageView];
+        if (item.title!=nil) {
+            self.titleLabel = [UILabel new];
+            [self.titleLabel setTextColor:item.tintColor];
+            [self.titleLabel setTextAlignment:item.textAligment];
+            self.titleLabel.backgroundColor = [UIColor clearColor];
+            [self.titleLabel setText:item.title];
+            [self.titleLabel setFont:item.font];
+            [self addSubview:self.titleLabel];
+        }
+        
+        if (item.image!=nil) {
+            self.image = [item.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+            self.iconIamageView = [UIImageView new];
+            self.iconIamageView.image = self.image;
+            [self.iconIamageView setTintColor:item.tintColor];
+            self.iconIamageView.backgroundColor = [UIColor clearColor];
+            [self.iconIamageView setContentMode:UIViewContentModeScaleAspectFit];
+            [self addSubview:self.iconIamageView];
+        }
         
         self.frame = frame;
     }
@@ -148,21 +154,28 @@
 
 -(void)layoutMenuItemViewasDefault{
     CGSize imageSize;
-    if (self.image!= nil) {
+    if (self.iconIamageView!= nil) {
         imageSize = CGSizeMake(self.bounds.size.height*0.9, self.bounds.size.height*0.9);
         self.iconIamageView.frame = CGRectMake(self.bounds.size.width*0.05, self.bounds.size.height*0.05, imageSize.width, imageSize.height);
     }else{
-        self.iconIamageView = nil;
         imageSize = CGSizeMake(0, 0);
     }
-    
     CGSize labelSize;
-    if (self.titleLabel.text!=nil) {
+    if (self.titleLabel!=nil) {
         labelSize = CGSizeMake((self.bounds.size.width*0.9 - imageSize.width), self.bounds.size.height*0.9);
+        self.titleLabel.frame = CGRectMake(CGRectGetMaxX(self.iconIamageView.frame), self.bounds.size.height*0.05, labelSize.width, labelSize.height);
     }else{
         labelSize = CGSizeMake(0, 0);
     }
-    self.titleLabel.frame = CGRectMake(CGRectGetMaxX(self.iconIamageView.frame), self.bounds.size.height*0.05, labelSize.width, labelSize.height);
+    
+    
+    if (self.iconIamageView == nil) {
+        self.titleLabel.center = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2);
+    }
+    if (self.titleLabel == nil) {
+        self.iconIamageView.center = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2);
+    }
+    
 }
 
 -(void)layoutMenuItemViewasList{
@@ -171,21 +184,23 @@
 
 -(void)layoutMenuItemViewasOval{
     CGSize labelSize;
-    if (self.titleLabel.text!= nil) {
+    if (self.titleLabel!= nil) {
         labelSize = [self.titleLabel sizeThatFits:(CGSize){self.bounds.size.width*0.9,CGFLOAT_MAX}];
     }else{
         labelSize = CGSizeMake(0, 0);
     }
     labelSize.width = self.bounds.size.width*0.9;
     CGSize imageSize;
-    if (self.image!=nil) {
+    if (self.iconIamageView!=nil) {
         imageSize = CGSizeMake(self.bounds.size.width*0.7, self.bounds.size.height-labelSize.height-5);
         self.iconIamageView.frame = CGRectMake(self.bounds.size.width*0.15, self.bounds.size.height*0.05, imageSize.width, imageSize.height);
-        [self.iconIamageView setContentMode:UIViewContentModeScaleAspectFit];
+        self.titleLabel.frame = CGRectMake(self.bounds.size.width*0.05, CGRectGetMaxY(self.iconIamageView.frame), labelSize.width, labelSize.height);
     }else{
         self.iconIamageView = nil;
+        self.titleLabel.frame = CGRectMake(self.bounds.size.width*0.05, CGRectGetMaxY(self.iconIamageView.frame), labelSize.width, labelSize.height);
+        self.titleLabel.center = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2);
     }
-    self.titleLabel.frame = CGRectMake(self.bounds.size.width*0.05, CGRectGetMaxY(self.iconIamageView.frame), labelSize.width, labelSize.height);
+
 }
 
 -(void)layoutMenuItemViewasGrid{
