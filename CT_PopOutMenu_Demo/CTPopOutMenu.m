@@ -201,11 +201,13 @@
 #pragma mark CTPopoutMenu
 
 @interface CTPopoutMenu ()
+
 @property (nonatomic)UIImageView * blurView;
 @property (nonatomic)CGPoint menuCenter;
 @property (nonatomic)NSMutableArray * itemViews;
 @property (nonatomic)UITextView * messageView, * titleView;
 @property (nonatomic)CTPopoutMenuItemView * selectedItemView;
+@property (nonatomic)CTPopoutMenuItem * selectedItem;
 
 @end
 
@@ -287,6 +289,7 @@
 
 -(CTPopoutMenuItemView*)itemViewatPoint:(CGPoint)point{
     CTPopoutMenuItemView * selectedItemView = nil;
+    CTPopoutMenuItem * selectedItem = nil;
     if (CGRectContainsPoint(self.menuView.frame, point)) {
         point = [self.view convertPoint:point toView:self.menuView];
         selectedItemView = [self.itemViews filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(CTPopoutMenuItemView * itemView, NSDictionary *bindings) {
@@ -294,13 +297,17 @@
         }]].lastObject;
     }
     if (selectedItemView!=nil) {
+        selectedItem = [self.items objectAtIndex:[self.itemViews indexOfObject:selectedItemView]];
         selectedItemView.backgroundColor = self.highlightColor;
         if (self.selectedItemView != selectedItemView) {
-            self.selectedItemView.backgroundColor = [UIColor clearColor];
+            self.selectedItemView.backgroundColor = self.selectedItem.backgroundColor;
             self.selectedItemView = selectedItemView;
+            self.selectedItem = selectedItem;
         }
     }else{
+        self.selectedItemView.backgroundColor = self.selectedItem.backgroundColor;
         self.selectedItemView = nil;
+        self.selectedItem = nil;
     }
     
     return selectedItemView;
